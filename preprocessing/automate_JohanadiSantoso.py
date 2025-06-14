@@ -39,12 +39,6 @@ def preprocess_data(input_path, output_path):
     
     return df
 
-# if __name__ == "__main__":
-#     input_path = '../personality_dataset.csv'
-#     output_path = 'personality_dataset_preprocessing.csv'
-#     preprocess_data(input_path, output_path)
-    
-    
 if __name__ == "__main__":
     input_path = 'personality_dataset.csv'
     output_path = 'preprocessing/personality_dataset_preprocessing.csv'
