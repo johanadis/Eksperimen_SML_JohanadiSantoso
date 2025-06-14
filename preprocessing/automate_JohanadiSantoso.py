@@ -18,8 +18,8 @@ def preprocess_data(input_path, output_path):
     df[categorical_col] = categorical_imputer.fit_transform(df[categorical_col])
     
     # Encoding data
-    df['Personality'] = (df['Personality'] == 'Introvert').astype(int)
-    df[categorical_col] = (df[categorical_col] == 'Yes').astype(int)
+    df['Personality'] = (df['Personality'] == 'Introvert').astype(float)
+    df[categorical_col] = (df[categorical_col] == 'Yes').astype(float)
     
     # Feature engineering
     df['social_alone_ratio'] = (df['Social_event_attendance'] + df['Going_outside']) / (df['Time_spent_Alone'] + 1)
