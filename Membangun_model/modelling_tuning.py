@@ -124,7 +124,7 @@ def main():
     mlflow.set_tracking_uri(tracking_uri)
     mlflow.set_experiment("Personality_Prediction")
     
-    df = pd.read_csv('personality_dataset_preprocessing.csv')
+    df = pd.read_csv('Membangun_model/personality_dataset_preprocessing.csv')
     categorical_cols = ['Stage_fear', 'Drained_after_socializing']
     
     X = df.drop('Personality', axis=1)
