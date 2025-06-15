@@ -111,7 +111,7 @@ def train_and_log_model(model, model_name, X_train, X_test, y_train, y_test, fea
 
 def main():
     tracking_uri = 'https://dagshub.com/johanadis/Eksperimen_SML_JohanadiSantoso.mlflow'
-    username = 'johanadis'
+    username = 'johanadis' 
     token = os.getenv('DAGSHUB_TOKEN')
     
     if not token:
@@ -122,7 +122,6 @@ def main():
     os.environ['MLFLOW_TRACKING_PASSWORD'] = token
     
     mlflow.set_tracking_uri(tracking_uri)
-    
     mlflow.set_experiment("Personality_Prediction")
     
     df = pd.read_csv('personality_dataset_preprocessing.csv')
