@@ -8,24 +8,28 @@ import mlflow
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+
+# Set batas maksimum penggunaan CPU ke 4 core
 os.environ["LOKY_MAX_CPU_COUNT"] = "4"
 
-# Aktifkan autologging
+# Aktifkan autologging MLflow untuk otomatis mencatat parameter, metrik, dan model
 mlflow.autolog()
         
 def train_and_log_model(model, model_name, X_train, X_test, y_train, y_test):
 
+    # Mulai run MLflow untuk setiap model
     with mlflow.start_run(run_name=model_name):
         
-        # Melatih model
+        # Melatih model dengan data training
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         y_proba = model.predict_proba(X_test)[:, 1]
     
-        # Menghitung metrik
+        # Menghitung metrik akurasi dan AUC-ROC
         acc = accuracy_score(y_test, y_pred)
         auc_roc = roc_auc_score(y_test, y_proba)
         
+        # Logging metrik ke MLflow
         mlflow.log_metric("accuracy", acc)
         mlflow.log_metric("auc_roc", auc_roc)
         
@@ -68,18 +72,20 @@ def train_and_log_model(model, model_name, X_train, X_test, y_train, y_test):
         print(f"{model_name} - Accuracy: {acc:.4f}, AUC-ROC: {auc_roc:.4f}")
 
 def main():
-    # Untuk pengujian lokal dengan server MLflow
+    # Konfigurasi MLflow untuk tracking lokal
     mlflow.set_tracking_uri("http://127.0.0.1:5000")
     
-    # Menetapkan nama eksperimen MLflow: Personality_Prediction, untuk mencatat seluruh run/model yang akan dilatih
+    # Menetapkan nama eksperimen MLflow: Personality_Prediction
     mlflow.set_experiment("Personality_Prediction")
     
-    # Memuat dan mengacak data
+    # Memuat dan mengacak data hasil preprocessing
     df = pd.read_csv('personality_dataset_preprocessing.csv')
     
-    # Membagi data
+    # Membagi data menjadi fitur (X) dan target (y)
     X = df.drop('Personality', axis=1)
     y = df['Personality']
+    
+    # Split data menjadi train dan test
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     
     # Mendefinisikan model dengan hyperparameter tetap

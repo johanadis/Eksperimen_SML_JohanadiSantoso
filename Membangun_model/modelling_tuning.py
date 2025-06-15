@@ -17,9 +17,10 @@ import joblib
 os.environ["LOKY_MAX_CPU_COUNT"] = "4"
 
 def train_and_log_model(model, model_name, X_train, X_test, y_train, y_test, feature_names, categorical_cols, params=None):
+    # Mulai run MLflow untuk logging eksperimen
     with mlflow.start_run(run_name=model_name):
         start = time.time()
-        # Handle categorical features for LightGBM
+        # Penanganan fitur kategorikal khusus untuk LightGBM
         if isinstance(model, LGBMClassifier):
             X_train_lgb = X_train.copy()
             X_test_lgb = X_test.copy()
@@ -37,10 +38,12 @@ def train_and_log_model(model, model_name, X_train, X_test, y_train, y_test, fea
         
         end = time.time()
         
+        # Hitung metrik evaluasi
         acc = accuracy_score(y_test, y_pred)
         auc_roc = roc_auc_score(y_test, y_proba)
         training_time = end - start
         
+        # Logging parameter dan metrik ke MLflow
         mlflow.log_param("model_type", model_name)
         if params:
             for key, value in params.items():
@@ -52,12 +55,13 @@ def train_and_log_model(model, model_name, X_train, X_test, y_train, y_test, fea
         
         input_example = X_train[:5]
         
+        # Logging model ke MLflow
         if isinstance(model, LGBMClassifier):
             mlflow.lightgbm.log_model(model, model_name, input_example=input_example)
         else:
             mlflow.sklearn.log_model(model, model_name, input_example=input_example)
 
-        # Save model artifact locally and log to MLflow
+        # Simpan model secara lokal dan log ke MLflow
         artifact_dir = "artifacts/tuned"
         os.makedirs(artifact_dir, exist_ok=True)
         if isinstance(model, LGBMClassifier):
@@ -68,6 +72,7 @@ def train_and_log_model(model, model_name, X_train, X_test, y_train, y_test, fea
             joblib.dump(model, model_path)
         mlflow.log_artifact(model_path)
 
+        # Plot confusion matrix dan log ke MLflow
         plot_dir = "plots/tuned"
         os.makedirs(plot_dir, exist_ok=True)
         cm = confusion_matrix(y_test, y_pred)
@@ -81,6 +86,7 @@ def train_and_log_model(model, model_name, X_train, X_test, y_train, y_test, fea
         mlflow.log_artifact(cm_path)
         plt.close()
         
+        # Plot ROC curve dan log ke MLflow
         fpr, tpr, _ = roc_curve(y_test, y_proba)
         roc_auc = auc(fpr, tpr)
         plt.figure(figsize=(6, 4))
@@ -95,6 +101,7 @@ def train_and_log_model(model, model_name, X_train, X_test, y_train, y_test, fea
         mlflow.log_artifact(roc_path)
         plt.close()
         
+        # Plot feature importance jika tersedia
         if hasattr(model, 'feature_importances_'):
             plt.figure(figsize=(10, 6))
             importances = model.feature_importances_
@@ -110,6 +117,7 @@ def train_and_log_model(model, model_name, X_train, X_test, y_train, y_test, fea
         print(f"{model_name} - Accuracy: {acc:.4f}, AUC-ROC: {auc_roc:.4f}, Training Time: {training_time:.4f}s")
 
 def main():
+    # Konfigurasi MLflow untuk tracking ke Dagshub
     tracking_uri = 'https://dagshub.com/johanadis/Eksperimen_SML_JohanadiSantoso.mlflow'
     username = 'johanadis' 
     token = os.getenv('DAGSHUB_TOKEN')
@@ -124,16 +132,20 @@ def main():
     mlflow.set_tracking_uri(tracking_uri)
     mlflow.set_experiment("Personality_Prediction")
     
+    # Load dataset hasil preprocessing
     df = pd.read_csv('Membangun_model/personality_dataset_preprocessing.csv')
     categorical_cols = ['Stage_fear', 'Drained_after_socializing']
     
+    # Pisahkan fitur dan target
     X = df.drop('Personality', axis=1)
     y = df['Personality']
     
+    # Encode label target menjadi numerik
     le = LabelEncoder()
     y = le.fit_transform(y)
     
     feature_names = X.columns.tolist()
+    # Split data menjadi train dan test
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     
     # Random Forest
@@ -142,6 +154,7 @@ def main():
         'max_depth': [3, 5, 10]
     }
     rf_model = RandomForestClassifier(random_state=42)
+    # Hyperparameter tuning dengan GridSearchCV
     rf_grid = GridSearchCV(rf_model, rf_param_grid, cv=5, scoring='accuracy')
     rf_grid.fit(X_train, y_train)
     train_and_log_model(rf_grid.best_estimator_, "Random Forest Tuned", X_train, X_test, y_train, y_test, feature_names, categorical_cols, rf_grid.best_params_)
@@ -153,6 +166,7 @@ def main():
         'max_depth': [3, 5, 10]
     }
     lgb_model = LGBMClassifier(random_state=42, verbose=-1)
+    # Hyperparameter tuning dengan GridSearchCV
     lgb_grid = GridSearchCV(lgb_model, lgb_param_grid, cv=5, scoring='accuracy')
     lgb_grid.fit(X_train, y_train)
     train_and_log_model(lgb_grid.best_estimator_, "LightGBM Tuned", X_train, X_test, y_train, y_test, feature_names, categorical_cols, lgb_grid.best_params_)
