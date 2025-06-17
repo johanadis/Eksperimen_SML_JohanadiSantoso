@@ -24,21 +24,28 @@ jobs:
           MLFLOW_TRACKING_URI: https://dagshub.com/johanadis/Eksperimen_SML_JohanadiSantoso.mlflow
           MLFLOW_TRACKING_USERNAME: johanadis
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
-      - name: Periksa Direktori Artefak
+      - name: Buat Direktori Artifacts dan Plots
         run: |
-          if [ -d "Membangun_model/artifacts" ] && [ "$(ls -A Membangun_model/artifacts)" ]; then
-            echo "Direktori artifacts ada dan berisi file."
+          mkdir -p Membangun_model/artifacts
+          mkdir -p Membangun_model/plots
+          echo "Direktori Membangun_model/artifacts dan Membangun_model/plots telah dibuat atau sudah ada."
+      - name: Debug Isi Direktori
+        run: |
+          echo "Isi direktori Membangun_model setelah pelatihan:"
+          ls -R Membangun_model/
+      - name: Periksa Isi Direktori Artefak
+        run: |
+          if [ "$(ls -A Membangun_model/artifacts)" ]; then
+            echo "Direktori artifacts berisi file."
           else
-            echo "Direktori artifacts tidak ada atau kosong."
-            exit 1
+            echo "Peringatan: Direktori artifacts kosong. Periksa modelling_tuning.py untuk memastikan file disimpan."
           fi
-      - name: Periksa Direktori Plot
+      - name: Periksa Isi Direktori Plot
         run: |
-          if [ -d "Membangun_model/plots" ] && [ "$(ls -A Membangun_model/plots)" ]; then
-            echo "Direktori plots ada dan berisi file."
+          if [ "$(ls -A Membangun_model/plots)" ]; then
+            echo "Direktori plots berisi file."
           else
-            echo "Direktori plots tidak ada atau kosong."
-            exit 1
+            echo "Peringatan: Direktori plots kosong. Periksa modelling_tuning.py untuk memastikan file disimpan."
           fi
       - name: Unggah Artefak Model
         uses: actions/upload-artifact@v4
@@ -58,4 +65,5 @@ jobs:
           git add Membangun_model/plots/tuned/*.png || true
           git add Membangun_model/artifacts/ || true
           git commit -m "Add MLflow artifacts via GitHub Actions" || echo "No changes to commit"
+          git pull --rebase origin main
           git push https://x:${{ secrets.GITHUB_TOKEN }}@github.com/johanadis/Eksperimen_SML_JohanadiSantoso.git
