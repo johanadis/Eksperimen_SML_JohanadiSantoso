@@ -63,7 +63,7 @@ def train_and_log_model(model, model_name, X_train, X_test, y_train, y_test, fea
             mlflow.sklearn.log_model(model, model_name, input_example=input_example)
 
         # Simpan model secara lokal di subfolder berdasarkan nama model
-        artifact_dir = f"artifacts/tuned/{model_name}"
+        artifact_dir = f"Membangun_model/artifacts/tuned/{model_name}"
         os.makedirs(artifact_dir, exist_ok=True)
         if isinstance(model, LGBMClassifier):
             model_path = os.path.join(artifact_dir, "model.txt")
@@ -74,7 +74,7 @@ def train_and_log_model(model, model_name, X_train, X_test, y_train, y_test, fea
         mlflow.log_artifact(model_path)
 
         # Plot confusion matrix dan simpan di subfolder model
-        plot_dir = f"plots/tuned/{model_name}"
+        plot_dir = f"Membangun_model/plots/tuned/{model_name}"
         os.makedirs(plot_dir, exist_ok=True)
         cm = confusion_matrix(y_test, y_pred)
         plt.figure(figsize=(6, 4))
