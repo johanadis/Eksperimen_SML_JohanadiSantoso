@@ -28,7 +28,8 @@ jobs:
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-          git add Membangun_model/Actual\ VS\ Predicted\ Graph/*.png || true
-          git add Membangun_model/*.jpg || true
+          git add Membangun_model/plots/*.png || true
+          git add Membangun_model/plots/tuned/*.png || true
+          git add Membangun_model/artifacts/ || true
           git commit -m "Add MLflow artifacts via GitHub Actions" || echo "No changes to commit"
           git push https://x:${{ secrets.GITHUB_TOKEN }}@github.com/johanadis/Eksperimen_SML_JohanadiSantoso.git
