@@ -13,6 +13,7 @@ import time
 import os
 from sklearn.preprocessing import LabelEncoder
 import joblib
+
 # Set batas maksimum penggunaan CPU ke 4 core
 os.environ["LOKY_MAX_CPU_COUNT"] = "4"
 
@@ -61,19 +62,19 @@ def train_and_log_model(model, model_name, X_train, X_test, y_train, y_test, fea
         else:
             mlflow.sklearn.log_model(model, model_name, input_example=input_example)
 
-        # Simpan model secara lokal dan log ke MLflow
-        artifact_dir = "artifacts/tuned"
+        # Simpan model secara lokal di subfolder berdasarkan nama model
+        artifact_dir = f"artifacts/tuned/{model_name}"
         os.makedirs(artifact_dir, exist_ok=True)
         if isinstance(model, LGBMClassifier):
-            model_path = os.path.join(artifact_dir, f"{model_name}_model.txt")
+            model_path = os.path.join(artifact_dir, "model.txt")
             model.booster_.save_model(model_path)
         else:
-            model_path = os.path.join(artifact_dir, f"{model_name}_model.pkl")
+            model_path = os.path.join(artifact_dir, "model.pkl")
             joblib.dump(model, model_path)
         mlflow.log_artifact(model_path)
 
-        # Plot confusion matrix dan log ke MLflow
-        plot_dir = "plots/tuned"
+        # Plot confusion matrix dan simpan di subfolder model
+        plot_dir = f"plots/tuned/{model_name}"
         os.makedirs(plot_dir, exist_ok=True)
         cm = confusion_matrix(y_test, y_pred)
         plt.figure(figsize=(6, 4))
@@ -81,12 +82,12 @@ def train_and_log_model(model, model_name, X_train, X_test, y_train, y_test, fea
         plt.title(f'Confusion Matrix - {model_name}')
         plt.xlabel('Predicted')
         plt.ylabel('Actual')
-        cm_path = os.path.join(plot_dir, f"{model_name}_cm.png")
+        cm_path = os.path.join(plot_dir, "confusion_matrix.png")
         plt.savefig(cm_path)
         mlflow.log_artifact(cm_path)
         plt.close()
         
-        # Plot ROC curve dan log ke MLflow
+        # Plot ROC curve dan simpan di subfolder model
         fpr, tpr, _ = roc_curve(y_test, y_proba)
         roc_auc = auc(fpr, tpr)
         plt.figure(figsize=(6, 4))
@@ -96,12 +97,12 @@ def train_and_log_model(model, model_name, X_train, X_test, y_train, y_test, fea
         plt.xlabel('FPR')
         plt.ylabel('TPR')
         plt.legend()
-        roc_path = os.path.join(plot_dir, f"{model_name}_roc.png")
+        roc_path = os.path.join(plot_dir, "roc_curve.png")
         plt.savefig(roc_path)
         mlflow.log_artifact(roc_path)
         plt.close()
         
-        # Plot feature importance jika tersedia
+        # Plot feature importance jika tersedia dan simpan di subfolder model
         if hasattr(model, 'feature_importances_'):
             plt.figure(figsize=(10, 6))
             importances = model.feature_importances_
@@ -109,7 +110,7 @@ def train_and_log_model(model, model_name, X_train, X_test, y_train, y_test, fea
             sns.barplot(x=importances[indices], y=np.array(feature_names)[indices])
             plt.title(f'Feature Importance ({model_name})')
             plt.tight_layout()
-            feat_imp_path = os.path.join(plot_dir, f"{model_name}_feature_importance.png")
+            feat_imp_path = os.path.join(plot_dir, "feature_importance.png")
             plt.savefig(feat_imp_path)
             mlflow.log_artifact(feat_imp_path)
             plt.close()
