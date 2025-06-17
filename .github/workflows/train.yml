@@ -26,44 +26,44 @@ jobs:
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
       - name: Buat Direktori Artifacts dan Plots
         run: |
-          mkdir -p artifacts/tuned
-          mkdir -p plots/tuned
-          echo "Direktori artifacts/tuned dan plots/tuned telah dibuat atau sudah ada."
+          mkdir -p Membangun_model/artifacts/tuned
+          mkdir -p Membangun_model/plots/tuned
+          echo "Direktori Membangun_model/artifacts/tuned dan Membangun_model/plots/tuned telah dibuat atau sudah ada."
       - name: Debug Isi Direktori
         run: |
           echo "Isi direktori setelah pelatihan:"
-          ls -R artifacts/
-          ls -R plots/
+          ls -R Membangun_model/artifacts/
+          ls -R Membangun_model/plots/
       - name: Periksa Isi Direktori Artefak
         run: |
-          if [ "$(ls -A artifacts/tuned)" ]; then
-            echo "Direktori artifacts/tuned berisi file."
+          if [ "$(ls -A Membangun_model/artifacts/tuned)" ]; then
+            echo "Direktori Membangun_model/artifacts/tuned berisi file."
           else
-            echo "Peringatan: Direktori artifacts/tuned kosong. Periksa modelling_tuning.py untuk memastikan file disimpan."
+            echo "Peringatan: Direktori Membangun_model/artifacts/tuned kosong. Periksa modelling_tuning.py untuk memastikan file disimpan."
           fi
       - name: Periksa Isi Direktori Plot
         run: |
-          if [ "$(ls -A plots/tuned)" ]; then
-            echo "Direktori plots/tuned berisi file."
+          if [ "$(ls -A Membangun_model/plots/tuned)" ]; then
+            echo "Direktori Membangun_model/plots/tuned berisi file."
           else
-            echo "Peringatan: Direktori plots/tuned kosong. Periksa modelling_tuning.py untuk memastikan file disimpan."
+            echo "Peringatan: Direktori Membangun_model/plots/tuned kosong. Periksa modelling_tuning.py untuk memastikan file disimpan."
           fi
       - name: Unggah Artefak Model
         uses: actions/upload-artifact@v4
         with:
           name: model-artifacts
-          path: artifacts/tuned/
+          path: Membangun_model/artifacts/tuned/
       - name: Unggah Plot
         uses: actions/upload-artifact@v4
         with:
           name: plots
-          path: plots/tuned/
+          path: Membangun_model/plots/tuned/
       - name: Commit artifacts
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-          git add artifacts/tuned/ || true
-          git add plots/tuned/ || true
+          git add Membangun_model/artifacts/tuned/ || true
+          git add Membangun_model/plots/tuned/ || true
           git commit -m "Add MLflow artifacts via GitHub Actions" || echo "No changes to commit"
           git pull --rebase origin main
           git push https://x:${{ secrets.GITHUB_TOKEN }}@github.com/johanadis/Eksperimen_SML_JohanadiSantoso.git
