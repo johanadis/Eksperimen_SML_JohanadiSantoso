@@ -24,6 +24,32 @@ jobs:
           MLFLOW_TRACKING_URI: https://dagshub.com/johanadis/Eksperimen_SML_JohanadiSantoso.mlflow
           MLFLOW_TRACKING_USERNAME: johanadis
           MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
+      - name: Periksa Direktori Artefak
+        run: |
+          if [ -d "Membangun_model/artifacts" ] && [ "$(ls -A Membangun_model/artifacts)" ]; then
+            echo "Direktori artifacts ada dan berisi file."
+          else
+            echo "Direktori artifacts tidak ada atau kosong."
+            exit 1
+          fi
+      - name: Periksa Direktori Plot
+        run: |
+          if [ -d "Membangun_model/plots" ] && [ "$(ls -A Membangun_model/plots)" ]; then
+            echo "Direktori plots ada dan berisi file."
+          else
+            echo "Direktori plots tidak ada atau kosong."
+            exit 1
+          fi
+      - name: Unggah Artefak Model
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-artifacts
+          path: Membangun_model/artifacts/
+      - name: Unggah Plot
+        uses: actions/upload-artifact@v4
+        with:
+          name: plots
+          path: Membangun_model/plots/
       - name: Commit artifacts
         run: |
           git config --global user.email "github-actions@github.com"
